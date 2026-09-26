@@ -21,9 +21,9 @@
 
 ## Overview
 
-**Enterprise AI Risk & Document Intelligence** is a hands-on reference implementation for building modern enterprise Generative AI systems beyond basic chatbot or prompt-wrapper patterns.
+**Enterprise AI Risk & Document Intelligence** s a production-oriented GenAI reference implementation for document intelligence, retrieval, evaluation, governance, and human review.
 
-The project focuses on the engineering concerns that become critical when AI systems operate over enterprise documents and must produce outputs that are **retrievable, observable, explainable, evaluable, and governable**.
+The project is designed as a focused engineering laboratory for evaluating modern enterprise GenAI architecture and complements my work building and operating a live production multi-agent AI system. Its purpose is to make individual architectural choices **measurable, reproducible, and inspectable—from document ingestion and retrieval through model evaluation, governance, observability, and human oversight**.
 
 The target architecture combines:
 
@@ -39,6 +39,30 @@ The target architecture combines:
 - production-oriented API and persistence patterns
 
 The project is intentionally **evaluation-first**. More advanced AI techniques are added only when they demonstrate measurable improvement over simpler baselines.
+
+---
+
+## Production Context
+
+This repository is a focused engineering lab and reference architecture for experimenting with modern enterprise GenAI patterns in a controlled, measurable way.
+
+It complements my production work on **WriterzRoom**, a live multi-agent AI system that applies many of the same engineering disciplines in a real application environment, including:
+
+- multi-stage AI orchestration
+- structured generation workflows
+- retrieval and evidence handling
+- regulated-content and governance workflows
+- human review
+- model/provider integration
+- production APIs
+- PostgreSQL persistence
+- observability and operational controls
+- enterprise-oriented access and workflow patterns
+
+The lab deliberately isolates individual architectural decisions so they can be benchmarked, evaluated, and documented more rigorously than is practical inside a continuously evolving production system.
+
+**Production system:** https://writerzroom.com/  
+**Documentation:** https://docs.writerzroom.com/getting-started/quick-start
 
 ---
 
