@@ -5,7 +5,7 @@ import asyncio
 from uuid import UUID
 
 from app.core.config import get_settings
-from app.db.session import SessionFactory
+from app.db.session import get_session_factory
 from app.generation.context import (
     assemble_generation_request,
 )
@@ -88,7 +88,7 @@ async def main(
         model=model,
     )
 
-    async with SessionFactory() as session:
+    async with get_session_factory()() as session:
         repository = SQLAlchemyRetrievalRepository(
             session
         )

@@ -6,7 +6,7 @@ from pathlib import Path
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-from app.db.session import SessionFactory
+from app.db.session import get_session_factory
 from app.ingestion.chunking.fixed_window import FixedWindowChunker
 from app.ingestion.parsers.structured_text import StructuredTextParser
 from app.ingestion.service import IngestionService
@@ -22,7 +22,7 @@ SAMPLE_PATH = Path(
 async def main() -> None:
     content = await asyncio.to_thread(SAMPLE_PATH.read_bytes)
 
-    async with SessionFactory() as session:
+    async with get_session_factory()() as session:
         repository = SQLAlchemyIngestionRepository(session)
 
         service = IngestionService(

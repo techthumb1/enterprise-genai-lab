@@ -5,7 +5,7 @@ import asyncio
 from uuid import UUID
 
 from app.core.config import get_settings
-from app.db.session import SessionFactory
+from app.db.session import get_session_factory
 from app.retrieval.embedding_service import EmbeddingService
 from app.retrieval.openai_embeddings import OpenAIEmbeddingProvider
 from app.retrieval.sqlalchemy_repository import (
@@ -49,7 +49,7 @@ async def main(
 
     total = 0
 
-    async with SessionFactory() as session:
+    async with get_session_factory()() as session:
         repository = SQLAlchemyRetrievalRepository(session)
 
         service = EmbeddingService(
