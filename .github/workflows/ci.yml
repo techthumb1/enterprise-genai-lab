@@ -21,7 +21,7 @@ jobs:
         working-directory: ui
       - run: npm run check
         working-directory: ui
-      - uses: astral-sh/setup-uv@v10.1.0
+      - uses: astral-sh/setup-uv@v10.2.0
         with:
           enable-cache: true
       - run: uv sync --locked --group dev
