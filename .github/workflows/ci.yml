@@ -11,8 +11,17 @@ jobs:
   quality:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: ui/package-lock.json
+      - run: npm ci
+        working-directory: ui
+      - run: npm run check
+        working-directory: ui
+      - uses: astral-sh/setup-uv@v10.1.0
         with:
           enable-cache: true
       - run: uv sync --locked --group dev
