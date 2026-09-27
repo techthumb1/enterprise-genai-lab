@@ -26,6 +26,14 @@ export interface ProcessingRun {
   created_at: string;
 }
 
+export interface DocumentUploadResponse {
+  document_id: string;
+  processing_run_id: string;
+  chunk_count: number;
+  created: boolean;
+  ready_for_retrieval: boolean;
+}
+
 export interface Citation {
   chunk_id: string;
 }

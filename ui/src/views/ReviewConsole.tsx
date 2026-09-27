@@ -122,8 +122,8 @@ export function ReviewConsole({ requestedReviewId }: ReviewConsoleProps) {
           <span className="eyebrow">Human-in-the-loop governance</span>
           <h1>Review console</h1>
           <p>
-            Inspect the candidate beside its evidence snapshot, then record an
-            accountable approval or rejection with mandatory rationale.
+            Evaluate unreleased answers against the captured source evidence,
+            then record an accountable approval or rejection with rationale.
           </p>
         </div>
         <button
@@ -152,7 +152,7 @@ export function ReviewConsole({ requestedReviewId }: ReviewConsoleProps) {
           ))}
         </div>
         <span className="evidence-notice">
-          <ShieldIcon /> Evidence is visible only inside the review surface
+          <ShieldIcon /> Select a queue item to inspect its Evidence snapshot
         </span>
       </div>
 
@@ -186,7 +186,7 @@ export function ReviewConsole({ requestedReviewId }: ReviewConsoleProps) {
               <strong>No {statusFilter} reviews</strong>
               <p>
                 {statusFilter === "pending"
-                  ? "High-risk grounded answers will appear here."
+                  ? "Choose High risk in the Answer Workbench to route a grounded answer and its evidence here."
                   : `No ${statusFilter} decisions are available.`}
               </p>
             </div>

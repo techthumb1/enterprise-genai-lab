@@ -1,5 +1,6 @@
 from collections.abc import AsyncGenerator
 
+from fastapi import HTTPException
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
@@ -20,7 +21,10 @@ def get_engine() -> AsyncEngine:
     if _engine is None:
         database_url = get_settings().database_url
         if database_url is None:
-            raise RuntimeError("DATABASE_URL is not configured")
+            raise HTTPException(
+                status_code=503,
+                detail="Database is not configured. Set DATABASE_URL and run migrations.",
+            )
         _engine = create_async_engine(database_url, pool_pre_ping=True)
 
     return _engine

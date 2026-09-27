@@ -2,6 +2,8 @@
 
 Production-oriented reference implementation for measurable retrieval, grounded generation, deterministic governance, and human review.
 
+![Answer Workbench showing document selection and governed question entry](docs/images/answer-workbench.png)
+
 [![CI](https://github.com/techthumb1/enterprise-genai-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/techthumb1/enterprise-genai-lab/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-async-009688?logo=fastapi&logoColor=white)
@@ -48,7 +50,7 @@ The governing principle is simple: **implement deterministic primitives first, m
 | Governance | Deterministic `allow`, `abstain`, and `human_review` outcomes; candidate/final separation |
 | Human review | Pending/approved/rejected lifecycle, reviewer rationale, evidence snapshot, concurrency-safe decision update |
 | API | Governed answers, safe processing-run catalog, review queue/retrieval, and concurrency-safe decisions |
-| Interface | Responsive React/TypeScript answer workbench and human-review console served by FastAPI |
+| Interface | Responsive React/TypeScript document upload, answer workbench, and human-review console served by FastAPI |
 | Observability | Central logging/Logfire configuration and workflow boundary metadata without raw prompt logging |
 
 ## Measured retrieval results
@@ -101,6 +103,23 @@ uv run uvicorn app.main:app --reload
 Set provider keys in the local `.env` only. `.env` and common secret/key formats are excluded from version control. Never commit real credentials; `.env.example` contains placeholders only.
 
 Open [http://localhost:8000](http://localhost:8000) for the answer workbench and review console. For frontend hot reload, run `npm --prefix ui run dev` in a second terminal; Vite proxies same-origin API requests to FastAPI on port 8000.
+
+Upload UTF-8 `.txt` or `.md` files (up to 2 MB) in the workbench to index a new processing run. Set `OPENAI_API_KEY` locally before indexing. PDF and Word files are not supported yet. If the review queue returns `503`, check `/ready`, the local PostgreSQL container, `DATABASE_URL`, and `uv run alembic upgrade head`.
+
+### Use the interface
+
+1. Upload a document or select an existing immutable processing run.
+2. Enter a question that can be answered from the selected document.
+3. Choose **Standard** to release a grounded answer immediately, or **High** to require human review.
+4. Generate the answer. The result shows its disposition, citation IDs, verification status, and workflow metadata.
+5. For high-risk results, choose **Open review** or open **Review console**, select the queue item, and inspect **Evidence snapshot** below the unreleased candidate.
+6. Record a reviewer ID and rationale, then approve or reject the candidate.
+
+The Answer Workbench displays citation IDs but does not expose raw evidence text. Full retrieved text is deliberately restricted to the Review Console, where each cited chunk is marked and preserved with the review record.
+
+![Review Console queue and evidence access notice](docs/images/review-console.png)
+
+![Governed result and risk-tier controls](docs/images/governed-result.png)
 
 Health endpoints:
 
@@ -166,7 +185,6 @@ Unit tests use deterministic fakes and make no paid provider calls. PostgreSQL i
 - [API](docs/api.md)
 - [Observability](docs/observability.md)
 - [Deployment](docs/deployment.md)
-- [Article draft](docs/article-draft.md)
 - [Security policy](SECURITY.md)
 - [Architecture decisions](docs/adr/001-deterministic-primitives-before-orchestration.md)
 - [Changelog](CHANGELOG.md)

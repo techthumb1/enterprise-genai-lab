@@ -37,6 +37,9 @@ export function AnswerWorkbench({ onOpenReview }: AnswerWorkbenchProps) {
   const [result, setResult] = useState<AnswerResponse | null>(null);
   const [elapsedMs, setElapsedMs] = useState<number | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploadMessage, setUploadMessage] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -65,6 +68,33 @@ export function AnswerWorkbench({ onOpenReview }: AnswerWorkbenchProps) {
     () => runs.find((run) => run.id === selectedRunId) ?? null,
     [runs, selectedRunId],
   );
+
+  async function handleUpload(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const input = event.currentTarget.elements.namedItem("document") as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      setUploadError("Document exceeds the 2 MB limit.");
+      return;
+    }
+    setUploading(true);
+    setUploadError(null);
+    setUploadMessage(null);
+    try {
+      const uploaded = await api.uploadDocument(file);
+      const items = await api.processingRuns();
+      setRuns(items);
+      setSelectedRunId(uploaded.processing_run_id);
+      setRunsError(null);
+      setUploadMessage(`${file.name} indexed with ${uploaded.chunk_count} chunks. Select it and ask a question.`);
+      input.value = "";
+    } catch (error: unknown) {
+      setUploadError(errorMessage(error));
+    } finally {
+      setUploading(false);
+    }
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -97,8 +127,9 @@ export function AnswerWorkbench({ onOpenReview }: AnswerWorkbenchProps) {
           <span className="eyebrow">Governed retrieval + generation</span>
           <h1>Answer workbench</h1>
           <p>
-            Ask against one immutable processing run. Every response is checked
-            for evidence, citations, and release risk before it reaches you.
+            Interrogate a versioned document corpus through an evidence-governed
+            workflow. Responses are grounded, citation-validated, and routed
+            according to release policy.
           </p>
         </div>
         <div className="policy-chip">
@@ -113,9 +144,22 @@ export function AnswerWorkbench({ onOpenReview }: AnswerWorkbenchProps) {
             <div className="step-number">01</div>
             <div>
               <h2 id="query-title">Frame the question</h2>
-              <p>Select a source representation and the required risk tier.</p>
+              <p>Upload or select a document run, enter a focused question, and choose the release policy.</p>
             </div>
           </div>
+
+          <form className="upload-form" onSubmit={handleUpload}>
+            <label className="field-label" htmlFor="document">Add a document</label>
+            <p>Upload UTF-8 .txt or .md, up to 2 MB. Indexing uses the configured provider.</p>
+            <div className="upload-controls">
+              <input id="document" name="document" type="file" accept=".txt,.md,.markdown,text/plain,text/markdown" required />
+              <button type="submit" disabled={uploading}>
+                {uploading ? "Indexing…" : "Upload and index"}
+              </button>
+            </div>
+            {uploadError && <div className="inline-alert error" role="alert">{uploadError}</div>}
+            {uploadMessage && <div className="inline-alert" role="status">{uploadMessage}</div>}
+          </form>
 
           <form onSubmit={handleSubmit}>
             <label className="field-label" htmlFor="processing-run">
@@ -215,7 +259,7 @@ export function AnswerWorkbench({ onOpenReview }: AnswerWorkbenchProps) {
                   />
                   <span>
                     <strong>High</strong>
-                    <small>Always route grounded output to review</small>
+                    <small>Route grounded output and its evidence to Review Console</small>
                   </span>
                 </label>
               </div>
@@ -337,6 +381,10 @@ function AnswerResult({ result, elapsedMs, onOpenReview }: AnswerResultProps) {
               </span>
             ))}
           </div>
+          <small className="evidence-guidance">
+            Citation IDs identify the supporting chunks. Full evidence text is
+            available in Review Console for answers routed to human review.
+          </small>
         </div>
       )}
 
