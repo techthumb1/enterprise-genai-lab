@@ -56,6 +56,21 @@ class SQLAlchemyReviewRepository:
         )
         return None if row is None else _to_record(row)
 
+    async def list(
+        self,
+        *,
+        status: ReviewStatus | None,
+        limit: int,
+    ) -> tuple[ReviewRecord, ...]:
+        statement = select(HumanReview).order_by(
+            HumanReview.created_at.desc(),
+            HumanReview.id.desc(),
+        )
+        if status is not None:
+            statement = statement.where(HumanReview.status == status.value)
+        rows = await self._session.scalars(statement.limit(limit))
+        return tuple(_to_record(row) for row in rows)
+
     async def decide(
         self,
         *,

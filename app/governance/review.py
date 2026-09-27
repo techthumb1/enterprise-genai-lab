@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from enum import StrEnum
-from typing import Protocol
+from typing import Literal, Protocol
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -34,7 +34,7 @@ class ReviewRecord(BaseModel):
 class ReviewDecision(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
-    status: ReviewStatus
+    status: Literal[ReviewStatus.APPROVED, ReviewStatus.REJECTED]
     reviewer_id: str = Field(min_length=1, max_length=255)
     comment: str = Field(min_length=1, max_length=4000)
 
@@ -50,6 +50,13 @@ class ReviewRepository(Protocol):
     ) -> ReviewRecord: ...
 
     async def get(self, review_id: UUID) -> ReviewRecord | None: ...
+
+    async def list(
+        self,
+        *,
+        status: ReviewStatus | None,
+        limit: int,
+    ) -> tuple[ReviewRecord, ...]: ...
 
     async def decide(
         self,
@@ -92,14 +99,22 @@ class ReviewService:
             raise ReviewNotFoundError(str(review_id))
         return review
 
+    async def list(
+        self,
+        *,
+        status: ReviewStatus | None = ReviewStatus.PENDING,
+        limit: int = 50,
+    ) -> tuple[ReviewRecord, ...]:
+        if not 1 <= limit <= 100:
+            raise ValueError("limit must be between 1 and 100")
+        return await self._repository.list(status=status, limit=limit)
+
     async def decide(
         self,
         *,
         review_id: UUID,
         decision: ReviewDecision,
     ) -> ReviewRecord:
-        if decision.status is ReviewStatus.PENDING:
-            raise ValueError("a decision must approve or reject the review")
         existing = await self._repository.get(review_id)
         if existing is None:
             raise ReviewNotFoundError(str(review_id))
