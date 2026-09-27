@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, Query, status
 
 from app.api.dependencies import ReviewServiceDependency
 from app.governance.review import (
@@ -10,9 +11,21 @@ from app.governance.review import (
     ReviewDecision,
     ReviewNotFoundError,
     ReviewRecord,
+    ReviewStatus,
 )
 
 router = APIRouter(prefix="/api/reviews", tags=["human review"])
+
+
+@router.get("", response_model=list[ReviewRecord])
+async def list_reviews(
+    service: ReviewServiceDependency,
+    review_status: Annotated[ReviewStatus | None, Query(alias="status")] = (
+        ReviewStatus.PENDING
+    ),
+    limit: Annotated[int, Query(ge=1, le=100)] = 50,
+) -> tuple[ReviewRecord, ...]:
+    return await service.list(status=review_status, limit=limit)
 
 
 @router.get("/{review_id}", response_model=ReviewRecord)
