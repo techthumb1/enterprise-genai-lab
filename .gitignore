@@ -11,6 +11,8 @@ __pycache__/
 htmlcov/
 dist/
 build/
+ui/node_modules/
+ui/dist/
 *.egg-info/
 *.pem
 *.key

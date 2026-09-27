@@ -12,3 +12,5 @@ tests
 docs
 samples
 evaluation-results
+ui/node_modules
+ui/dist

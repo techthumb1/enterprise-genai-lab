@@ -5,13 +5,21 @@ Production-oriented reference implementation for measurable retrieval, grounded 
 [![CI](https://github.com/techthumb1/enterprise-genai-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/techthumb1/enterprise-genai-lab/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-async-009688?logo=fastapi&logoColor=white)
+![Pydantic](https://img.shields.io/badge/Pydantic-v2-E92063?logo=pydantic&logoColor=white)
+![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.x-D71F00?logo=sqlalchemy&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-18-4169E1?logo=postgresql&logoColor=white)
+![pgvector](https://img.shields.io/badge/pgvector-0.5+-336791)
 ![LangGraph](https://img.shields.io/badge/LangGraph-typed_workflows-111111)
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=17211F)
+![TypeScript](https://img.shields.io/badge/TypeScript-6-3178C6?logo=typescript&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white)
+![OpenTelemetry](https://img.shields.io/badge/OpenTelemetry-enabled-F5A800?logo=opentelemetry&logoColor=17211F)
+![Ruff](https://img.shields.io/badge/Ruff-0.16-D7FF64?logo=ruff&logoColor=17211F)
 ![mypy](https://img.shields.io/badge/mypy-strict-2A6DB2)
 
 ## Why this project exists
 
-This is not another chat-with-a-PDF demo. It is an engineering lab for the parts of enterprise GenAI systems that determine whether an answer can be trusted, reproduced, reviewed, and operated:
+Enterprise AI Risk & Document Intelligence is an evaluation-first reference implementation for measurable retrieval, evidence-grounded generation, deterministic governance, and human review. It concentrates on the engineering decisions that determine whether an answer can be trusted, reproduced, reviewed, and operated:
 
 - deterministic ingestion with source provenance;
 - immutable, versioned processing strategies;
@@ -39,7 +47,8 @@ The governing principle is simple: **implement deterministic primitives first, m
 | Orchestration | Typed LangGraph nodes for retrieve, assemble, generate, verify, risk, finalize, abstain, and review |
 | Governance | Deterministic `allow`, `abstain`, and `human_review` outcomes; candidate/final separation |
 | Human review | Pending/approved/rejected lifecycle, reviewer rationale, evidence snapshot, concurrency-safe decision update |
-| API | Governed answer endpoint plus review retrieval and decision endpoints |
+| API | Governed answers, safe processing-run catalog, review queue/retrieval, and concurrency-safe decisions |
+| Interface | Responsive React/TypeScript answer workbench and human-review console served by FastAPI |
 | Observability | Central logging/Logfire configuration and workflow boundary metadata without raw prompt logging |
 
 ## Measured retrieval results
@@ -77,17 +86,21 @@ flowchart TD
 
 ## Quick start
 
-Requirements: Python 3.12, `uv`, Docker, and Docker Compose.
+Requirements: Python 3.12, Node.js 24, `uv`, Docker, and Docker Compose.
 
 ```bash
 cp .env.example .env
 docker compose up -d db
 uv sync --locked --group dev
 uv run alembic upgrade head
+npm --prefix ui ci
+npm --prefix ui run build
 uv run uvicorn app.main:app --reload
 ```
 
 Set provider keys in the local `.env` only. `.env` and common secret/key formats are excluded from version control. Never commit real credentials; `.env.example` contains placeholders only.
+
+Open [http://localhost:8000](http://localhost:8000) for the answer workbench and review console. For frontend hot reload, run `npm --prefix ui run dev` in a second terminal; Vite proxies same-origin API requests to FastAPI on port 8000.
 
 Health endpoints:
 
@@ -130,12 +143,15 @@ curl -X POST http://localhost:8000/api/answer \
 
 The response exposes the governed final answer, citations, verification result, risk decision, workflow ID, and optional review ID. It does not return raw retrieved evidence or the unreleased candidate.
 
+The browser interface calls the same typed endpoints. Processing-run selection exposes metadata only; review evidence is limited to the dedicated review surface. Authentication and reviewer authorization remain required before any public production deployment.
+
 ## Quality gates
 
 ```bash
 uv run ruff check app tests scripts
 uv run mypy app tests scripts
 uv run python -m pytest -q
+npm --prefix ui run check
 ```
 
 Unit tests use deterministic fakes and make no paid provider calls. PostgreSQL integration tests run when `DATABASE_URL` is present and skip explicitly when it is not.
@@ -146,6 +162,7 @@ Unit tests use deterministic fakes and make no paid provider calls. PostgreSQL i
 - [Retrieval evaluation](docs/retrieval-evaluation.md)
 - [Model evaluation](docs/model-evaluation.md)
 - [Governance and human review](docs/governance.md)
+- [User interface](docs/ui.md)
 - [API](docs/api.md)
 - [Observability](docs/observability.md)
 - [Deployment](docs/deployment.md)

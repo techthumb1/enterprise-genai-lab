@@ -2,6 +2,10 @@
 
 ## 2026-09-27
 
+- Added a responsive React 19/TypeScript answer workbench and human-review console.
+- Added safe processing-run discovery and status-filtered review queue APIs.
+- Added FastAPI static frontend delivery, a multi-stage Node/Python container build, and frontend CI gates.
+- Restored technology badges and refreshed README, API, architecture, governance, deployment, observability, and security documentation.
 - Added typed LangGraph orchestration for retrieval, structured generation, verification, risk routing, release, abstention, and human review.
 - Added deterministic `allow`, `abstain`, and `human_review` policy.
 - Added persisted review records, single-decision lifecycle, SQLAlchemy repository, and Alembic migration.
