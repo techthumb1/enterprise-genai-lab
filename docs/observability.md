@@ -21,4 +21,6 @@ Logging is configured once in `app/core/logging.py` and bridges standard Python 
 
 Local configuration uses `send_to_logfire=False`. A deployment may enable an approved exporter only after retention, access, redaction, and data-residency requirements are defined.
 
+The interface displays workflow IDs, model metadata, policy outcomes, evidence counts, and client-observed elapsed time. It does not add browser telemetry or persist questions, answers, evidence, or reviewer comments in local storage.
+
 Token and cost metadata are not logged because the current provider protocol does not yet normalize usage consistently. Add those fields only with explicit typed metadata and tests.

@@ -33,6 +33,8 @@ Processing runs are immutable experiment boundaries. A new parsing or chunking s
 6. The risk gate produces `allow`, `abstain`, or `human_review` from explicit facts.
 7. The system releases, abstains, or persists a pending review.
 
+The browser interface is a thin operational client over these contracts. It obtains retrieval-ready processing-run metadata, submits questions, renders only the governed `final_answer`, and uses a separate review surface for candidate/evidence access. Provider and database credentials remain server-side.
+
 Provider exceptions exit as operational failures. They do not traverse the abstention branch.
 
 ## Package boundaries
@@ -43,10 +45,12 @@ Provider exceptions exit as operational failures. They do not traverse the abste
 | `app/retrieval` | Embedding abstraction, lexical/vector queries, RRF fusion |
 | `app/generation` | Provider contracts, structured candidates, citation verification |
 | `app/governance` | Deterministic risk decisions and review lifecycle |
+| `app/catalog` | Safe processing-run discovery for API clients |
 | `app/agents` | Typed LangGraph state and routing |
 | `app/evaluation` | Retrieval and generation measurement |
 | `app/api` | HTTP transport and dependency construction |
 | `app/models` | SQLAlchemy persistence models |
+| `ui` | React/TypeScript answer workbench and review console |
 
 ## Key invariants
 
@@ -58,6 +62,8 @@ Provider exceptions exit as operational failures. They do not traverse the abste
 - candidates remain distinct from final, releasable answers;
 - high-risk, otherwise-valid candidates require human review;
 - a review decision is single-use and records reviewer rationale;
+- answer responses never expose evidence text or unreleased candidates;
+- the browser sends no provider or database credentials;
 - routine tests never invoke paid providers.
 
 ## Provider independence
@@ -66,4 +72,8 @@ Provider exceptions exit as operational failures. They do not traverse the abste
 
 ## Database lifecycle
 
-Database engine creation is lazy. Health checks and unit tests can import the application without a local database, while production configuration rejects a missing `DATABASE_URL`. Alembic owns schema changes, including processing runs and human reviews.
+Database engine creation is lazy. Health checks, static frontend delivery, and unit tests can import the application without a local database, while production configuration rejects a missing `DATABASE_URL`. Alembic owns schema changes, including processing runs and human reviews.
+
+## Delivery boundary
+
+Vite produces static assets in `ui/dist`. FastAPI's low-priority frontend route serves those assets and the application shell while preserving all explicit API routes. The production container builds the TypeScript application in an isolated Node stage, then copies only the compiled assets into the Python runtime image.

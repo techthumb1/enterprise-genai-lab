@@ -21,8 +21,17 @@ The response includes workflow/provider/model identifiers, evidence count, final
 
 `high` risk creates a pending review after successful grounding verification. Invalid grounding abstains and never creates a review.
 
+## Processing-run catalog
+
+`GET /api/processing-runs?ready_only=true&limit=50`
+
+Returns processing runs that the answer workbench can select. Each item contains document and run IDs, filename, parser/chunker versions, chunk and embedding counts, embedding provider/model, readiness, and creation time. It intentionally omits document content, checksums, source metadata, and credentials.
+
+`ready_only` defaults to `true`. `limit` must be between 1 and 100.
+
 ## Human review
 
+- `GET /api/reviews?status=pending&limit=50`: list review records by status.
 - `GET /api/reviews/{review_id}`: retrieve a review record.
 - `POST /api/reviews/{review_id}/decision`: approve or reject a pending review.
 
@@ -36,10 +45,16 @@ The response includes workflow/provider/model identifiers, evidence count, final
 
 Repeated or concurrent decisions return `409`. Missing reviews return `404`.
 
+Review records include the unreleased candidate and captured evidence because reviewers need both to make a decision. Treat list and detail responses as sensitive document access, not as general answer APIs.
+
+## Browser interface
+
+FastAPI serves the compiled interface at `/` after API routes, so `/health`, `/ready`, and `/api/*` retain priority. The browser uses relative same-origin requests and contains no provider keys or database credentials. A missing frontend build does not prevent API startup; build `ui/dist` before serving the interface.
+
 ## Error semantics
 
 - `422`: invalid typed request.
-- `404`: unknown review.
+- `404`: unknown review or frontend asset.
 - `409`: review already decided.
 - `503`: provider not configured or temporarily unavailable.
 - `502`: provider response violated the structured-output contract.

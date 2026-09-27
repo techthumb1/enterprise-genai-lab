@@ -34,6 +34,8 @@ The initial risk gate has three outcomes: allow, abstain, and human review. It u
 
 Reviews preserve the candidate, evidence snapshot, reason, reviewer identity, comment, status, and timestamps. A pending review may be decided once, which makes concurrent decisions visible instead of silently overwriting history.
 
+A lightweight operational interface closes that loop without turning the system into a generic chat product. The answer workbench selects an immutable processing run and shows only the governed result; the review console isolates access to unreleased candidates and evidence, and requires an explicit reviewer rationale. The UI adds no credentials or policy logic—the typed API remains the enforcement boundary.
+
 ## What the benchmark does—and does not—prove
 
 The current results show that the architecture can preserve processing history, measure representation changes, retrieve within an experiment boundary, enforce citation IDs, route risk deterministically, and retain human decisions. The single-document benchmark does not prove production-scale retrieval quality, semantic factuality, or regulatory compliance.
