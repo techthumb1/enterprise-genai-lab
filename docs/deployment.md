@@ -6,14 +6,20 @@ Copy `.env.example` to a local `.env` and replace placeholders locally. Never co
 
 Production requires `DATABASE_URL`. Provider-backed answer generation also requires `OPENAI_API_KEY`. Optional provider comparison uses `ANTHROPIC_API_KEY`.
 
+The browser bundle must never contain any of these values. It uses relative same-origin HTTP calls and requires no environment-injected secret or public API key.
+
 ## Local stack
 
 ```bash
 docker compose up -d db
 uv sync --locked --group dev
 uv run alembic upgrade head
+npm --prefix ui ci
+npm --prefix ui run build
 uv run uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
+
+Open `http://localhost:8000`. For frontend hot reload, replace the build step with `npm --prefix ui run dev` in a second terminal; the Vite development server proxies `/api`, `/health`, and `/ready` to port 8000.
 
 Readiness is false until PostgreSQL is reachable:
 
@@ -21,6 +27,17 @@ Readiness is false until PostgreSQL is reachable:
 curl --fail http://localhost:8000/health
 curl --fail http://localhost:8000/ready
 ```
+
+## Container build
+
+The Dockerfile uses a Node 24 build stage for the interface and a Python 3.12 runtime stage for the API. Only `ui/dist` is copied from the frontend stage; `node_modules`, source maps, local environment files, tests, and documentation are excluded from the runtime image.
+
+```bash
+docker build -t enterprise-genai-lab .
+docker run --rm -p 8000:8000 --env-file .env enterprise-genai-lab
+```
+
+Apply Alembic migrations as a release step before starting new application replicas. Do not bake `.env` or cloud credentials into an image.
 
 ## Migration sequence
 
@@ -36,6 +53,8 @@ The local pgvector container provisions the `vector` extension through `docker/p
 
 - authenticate callers and authorize processing runs;
 - authorize review access and bind reviewer identity to the session;
+- protect the full review queue because it contains candidate answers and evidence text;
+- set browser security headers and a restrictive content security policy;
 - set request/body limits and rate limits;
 - configure CORS explicitly;
 - use managed secret storage and rotation;

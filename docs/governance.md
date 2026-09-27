@@ -37,9 +37,16 @@ A pending review stores workflow and review IDs, routing reason, candidate answe
 
 Decision updates only succeed while status is `pending`, preventing two reviewers from silently overwriting one another.
 
+## Review console
+
+The review console makes the existing lifecycle operable without changing its authority model. Reviewers can filter pending, approved, and rejected records; compare an unreleased candidate with its captured evidence; see which chunks were cited; and approve or reject only after entering both reviewer identity and rationale.
+
+The UI does not release a candidate directly or bypass server checks. A decision still passes through the concurrency-safe API update, and a stale second decision receives `409`. The browser-supplied reviewer ID is a lab input; production must derive verified reviewer identity and permissions from an authenticated session.
+
 ## Security boundaries
 
-- API responses do not expose raw evidence or unreleased candidates.
+- Governed answer responses do not expose raw evidence or unreleased candidates.
+- Review responses expose both by design and therefore require stricter authorization.
 - Logs contain identifiers, counts, timing, model metadata, and outcomes—not API keys or raw prompts.
 - Secrets are loaded through `SecretStr` settings and local environment variables.
 - Review endpoints require an authentication/authorization layer before public production use.

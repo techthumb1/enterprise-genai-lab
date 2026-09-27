@@ -1,5 +1,6 @@
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 import logfire
 from fastapi import FastAPI
@@ -17,7 +18,7 @@ async def lifespan(_: FastAPI) -> AsyncGenerator[None, None]:
     await dispose_engine()
 
 
-def create_app() -> FastAPI:
+def create_app(*, frontend_directory: Path | None = None) -> FastAPI:
     settings = get_settings()
 
     configure_logging(settings)
@@ -31,6 +32,16 @@ def create_app() -> FastAPI:
 
     application.include_router(api_router)
     logfire.instrument_fastapi(application)
+    application.frontend(
+        "/",
+        directory=(
+            frontend_directory
+            if frontend_directory is not None
+            else Path(__file__).resolve().parents[1] / "ui" / "dist"
+        ),
+        fallback="index.html",
+        check_dir=False,
+    )
 
     return application
 

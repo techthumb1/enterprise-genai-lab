@@ -6,6 +6,8 @@ from fastapi import Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.agents.workflow import GovernedAnswerWorkflow
+from app.catalog.models import ProcessingRunCatalog
+from app.catalog.sqlalchemy_repository import SQLAlchemyProcessingRunCatalog
 from app.core.config import Settings, get_settings
 from app.db.session import get_session
 from app.generation.openai_provider import OpenAIGenerationProvider
@@ -56,5 +58,20 @@ def get_review_service(session: SessionDependency) -> ReviewService:
     return ReviewService(SQLAlchemyReviewRepository(session))
 
 
+def get_processing_run_catalog(
+    settings: SettingsDependency,
+    session: SessionDependency,
+) -> ProcessingRunCatalog:
+    return SQLAlchemyProcessingRunCatalog(
+        session,
+        embedding_provider="openai",
+        embedding_model=settings.openai_embedding_model,
+    )
+
+
 WorkflowDependency = Annotated[GovernedAnswerWorkflow, Depends(get_answer_workflow)]
 ReviewServiceDependency = Annotated[ReviewService, Depends(get_review_service)]
+ProcessingRunCatalogDependency = Annotated[
+    ProcessingRunCatalog,
+    Depends(get_processing_run_catalog),
+]

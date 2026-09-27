@@ -25,6 +25,18 @@ class MemoryReviewRepository:
     async def get(self, review_id: UUID) -> ReviewRecord | None:
         return self.record if self.record and self.record.id == review_id else None
 
+    async def list(
+        self,
+        *,
+        status: ReviewStatus | None,
+        limit: int,
+    ) -> tuple[ReviewRecord, ...]:
+        if self.record is None or (
+            status is not None and self.record.status is not status
+        ):
+            return ()
+        return (self.record,)[:limit]
+
     async def decide(
         self, *, review_id: UUID, decision: ReviewDecision
     ) -> ReviewRecord | None:
@@ -64,3 +76,20 @@ async def test_review_can_be_approved_once() -> None:
 
     with pytest.raises(ReviewConflictError):
         await service.decide(review_id=result.id, decision=decision)
+
+
+async def test_review_service_lists_pending_reviews() -> None:
+    repository = MemoryReviewRepository()
+    repository.record = ReviewRecord(
+        id=uuid4(),
+        workflow_id=uuid4(),
+        status=ReviewStatus.PENDING,
+        reason="high risk",
+        candidate_answer=GroundedAnswer(answer="Candidate", citations=()),
+        evidence=(),
+        created_at=datetime.now(UTC),
+    )
+
+    reviews = await ReviewService(repository).list()
+
+    assert reviews == (repository.record,)
