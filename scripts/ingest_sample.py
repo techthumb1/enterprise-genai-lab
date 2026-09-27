@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 from pathlib import Path
 
-from app.db.session import SessionFactory
+from app.db.session import get_session_factory
 from app.ingestion.chunking.fixed_window import FixedWindowChunker
 from app.ingestion.parsers.text import TextParser
 from app.ingestion.service import IngestionService
@@ -18,7 +18,7 @@ SAMPLE_PATH = Path(
 async def main() -> None:
     content = await asyncio.to_thread(SAMPLE_PATH.read_bytes)
 
-    async with SessionFactory() as session:
+    async with get_session_factory()() as session:
         repository = SQLAlchemyIngestionRepository(session)
 
         service = IngestionService(

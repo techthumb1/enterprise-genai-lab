@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-from openai import AsyncOpenAI
+from openai import AsyncOpenAI, OpenAIError
 
 from app.generation.models import (
     GenerationRequest,
     GroundedAnswer,
 )
+from app.generation.provider import GenerationOutputError, GenerationProviderError
 
 _SYSTEM_INSTRUCTIONS = """
 You are a grounded document-intelligence assistant.
@@ -58,18 +59,21 @@ class OpenAIGenerationProvider:
         self,
         request: GenerationRequest,
     ) -> GroundedAnswer:
-        response = await self._client.responses.parse(
-            model=self.model,
-            instructions=_SYSTEM_INSTRUCTIONS,
-            input=_format_input(request),
-            text_format=GroundedAnswer,
-            store=False,
-        )
+        try:
+            response = await self._client.responses.parse(
+                model=self.model,
+                instructions=_SYSTEM_INSTRUCTIONS,
+                input=_format_input(request),
+                text_format=GroundedAnswer,
+                store=False,
+            )
+        except OpenAIError as exc:
+            raise GenerationProviderError("generation provider unavailable") from exc
 
         parsed = response.output_parsed
 
         if parsed is None:
-            raise RuntimeError(
+            raise GenerationOutputError(
                 "OpenAI response did not contain structured output"
             )
 

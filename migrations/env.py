@@ -16,6 +16,9 @@ config = context.config
 
 settings = get_settings()
 
+if settings.database_url is None:
+    raise RuntimeError("DATABASE_URL is required to run migrations")
+
 config.set_main_option(
     "sqlalchemy.url",
     settings.database_url.replace("%", "%%"),

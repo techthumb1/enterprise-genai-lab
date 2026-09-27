@@ -10,7 +10,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
-from app.db.session import SessionFactory
+from app.db.session import get_session_factory
 from app.evaluation.retrieval import (
     ChunkSpan,
     LabeledQuery,
@@ -408,7 +408,7 @@ async def main(
         model="text-embedding-3-small",
     )
 
-    async with SessionFactory() as session:
+    async with get_session_factory()() as session:
         repository = SQLAlchemyRetrievalRepository(
             session
         )
