@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
+import os
 import uuid
 
 import pytest
 from sqlalchemy import delete, func, select
 
-from app.db.session import SessionFactory
+from app.db.session import get_session_factory
 from app.ingestion.chunking.fixed_window import FixedWindowChunker
 from app.ingestion.hashing import sha256_bytes
 from app.ingestion.models import (
@@ -20,6 +21,11 @@ from app.models.document import (
     Document,
     DocumentChunk,
     DocumentProcessingRun,
+)
+
+pytestmark = pytest.mark.skipif(
+    "DATABASE_URL" not in os.environ,
+    reason="DATABASE_URL is required for PostgreSQL integration tests",
 )
 
 
@@ -62,7 +68,7 @@ async def test_repository_persists_and_deduplicates_document() -> None:
     )
 
     try:
-        async with SessionFactory() as session:
+        async with get_session_factory()() as session:
             repository = SQLAlchemyIngestionRepository(session)
 
             first = await repository.save(draft)
@@ -72,7 +78,7 @@ async def test_repository_persists_and_deduplicates_document() -> None:
             assert first.chunk_count == len(chunks)
             assert first.processing_run_id is not None
 
-        async with SessionFactory() as session:
+        async with get_session_factory()() as session:
             repository = SQLAlchemyIngestionRepository(session)
 
             duplicate = await repository.save(draft)
@@ -99,7 +105,7 @@ async def test_repository_persists_and_deduplicates_document() -> None:
             assert chunk_count == len(chunks)
 
     finally:
-        async with SessionFactory() as session:
+        async with get_session_factory()() as session:
             await session.execute(
                 delete(Document).where(
                     Document.checksum_sha256 == checksum
@@ -174,12 +180,12 @@ async def test_repository_versions_processing_strategy_for_same_document() -> No
     )
 
     try:
-        async with SessionFactory() as session:
+        async with get_session_factory()() as session:
             repository = SQLAlchemyIngestionRepository(session)
 
             baseline = await repository.save(baseline_draft)
 
-        async with SessionFactory() as session:
+        async with get_session_factory()() as session:
             repository = SQLAlchemyIngestionRepository(session)
 
             candidate = await repository.save(candidate_draft)
@@ -215,7 +221,7 @@ async def test_repository_versions_processing_strategy_for_same_document() -> No
             )
 
     finally:
-        async with SessionFactory() as session:
+        async with get_session_factory()() as session:
             await session.execute(
                 delete(Document).where(
                     Document.checksum_sha256 == checksum
