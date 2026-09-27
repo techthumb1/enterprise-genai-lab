@@ -127,8 +127,9 @@ export function AnswerWorkbench({ onOpenReview }: AnswerWorkbenchProps) {
           <span className="eyebrow">Governed retrieval + generation</span>
           <h1>Answer workbench</h1>
           <p>
-            Ask against one immutable processing run. Every response is checked
-            for evidence, citations, and release risk before it reaches you.
+            Interrogate a versioned document corpus through an evidence-governed
+            workflow. Responses are grounded, citation-validated, and routed
+            according to release policy.
           </p>
         </div>
         <div className="policy-chip">
@@ -143,7 +144,7 @@ export function AnswerWorkbench({ onOpenReview }: AnswerWorkbenchProps) {
             <div className="step-number">01</div>
             <div>
               <h2 id="query-title">Frame the question</h2>
-              <p>Select a source representation and the required risk tier.</p>
+              <p>Upload or select a document run, enter a focused question, and choose the release policy.</p>
             </div>
           </div>
 
@@ -258,7 +259,7 @@ export function AnswerWorkbench({ onOpenReview }: AnswerWorkbenchProps) {
                   />
                   <span>
                     <strong>High</strong>
-                    <small>Always route grounded output to review</small>
+                    <small>Route grounded output and its evidence to Review Console</small>
                   </span>
                 </label>
               </div>
@@ -380,6 +381,10 @@ function AnswerResult({ result, elapsedMs, onOpenReview }: AnswerResultProps) {
               </span>
             ))}
           </div>
+          <small className="evidence-guidance">
+            Citation IDs identify the supporting chunks. Full evidence text is
+            available in Review Console for answers routed to human review.
+          </small>
         </div>
       )}
 
