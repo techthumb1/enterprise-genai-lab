@@ -1,5 +1,3 @@
-<div align="center">
-
 # Enterprise AI Risk & Document Intelligence
 
 **Production-oriented GenAI architecture for document intelligence, retrieval, evaluation, governance, and human review.**
@@ -14,8 +12,6 @@
 ![OpenTelemetry](https://img.shields.io/badge/OpenTelemetry-Observability-000000?logo=opentelemetry&logoColor=white)
 ![Ruff](https://img.shields.io/badge/Ruff-Linting-D7FF64?logo=ruff&logoColor=111111)
 ![mypy](https://img.shields.io/badge/mypy-Strict_Typing-2A6DB2)
-
-</div>
 
 ---
 
@@ -61,8 +57,8 @@ It complements my production work on **WriterzRoom**, a live multi-agent AI syst
 
 The lab deliberately isolates individual architectural decisions so they can be benchmarked, evaluated, and documented more rigorously than is practical inside a continuously evolving production system.
 
-**Production system:** https://writerzroom.com/  
-**Documentation:** https://docs.writerzroom.com/getting-started/quick-start
+**Production system:** <https://writerzroom.com/>  
+**Documentation:** <https://docs.writerzroom.com/getting-started/quick-start>
 
 ---
 
@@ -73,7 +69,7 @@ The lab deliberately isolates individual architectural decisions so they can be 
 The initial production foundation is implemented and validated.
 
 | Capability | Status |
-|---|---|
+| --- | --- |
 | Python 3.12 environment managed with `uv` | ✅ |
 | FastAPI application foundation | ✅ |
 | Pydantic v2 configuration and validation | ✅ |
@@ -534,6 +530,6 @@ The first Alembic schema revision has been successfully applied to PostgreSQL 18
 
 The next major milestones are:
 
-**Document Intelligence → Retrieval Baselines → Retrieval Evaluation → Embeddings → Hybrid Search → Reranking → Structured Generation → Governance → LangGraph Orchestration → Human Review → Full AI Observability**
+Document Intelligence → Retrieval Baselines → Retrieval Evaluation → Embeddings → Hybrid Search → Reranking → Structured Generation → Governance → LangGraph Orchestration → Human Review → Full AI Observability
 
 The final result is intended to serve as both a working system and a reference architecture for designing measurable, governable enterprise GenAI applications.

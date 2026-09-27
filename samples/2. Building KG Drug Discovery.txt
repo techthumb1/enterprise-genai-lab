@@ -1,0 +1,78 @@
+Building a Biomedical Knowledge Graph for Drug Discovery
+From Raw Data to Relational Intelligence
+Photo by Logan Voss on UnsplashIn our last article, we explored how knowledge graphs can model the complex relationships between drugs, proteins, diseases, and biological functions. Now let's dive into the engineering behind these graphs.
+This article shows you how to go from biomedical datasets like DrugBank, BioKG, and Hetionet to a machine-learning-ready graph structure, which can then be used for KGNN-based prediction models.
+Step 1: Choosing the Right Biomedical Datasets
+🔹 DrugBank
+Contains drug descriptions, targets, mechanisms of action, interactions, and clinical data.
+# Load from structured XML or TSV
+df_drugs = pd.read_csv("drugbank_drugs.tsv", sep="\t")
+df_targets = pd.read_csv("drugbank_targets.tsv", sep="\t")
+🔹 BioKG
+An automatically harmonized knowledge graph with:
+15 node types (e.g., Drug, Gene, Disease)
+70+ relation types
+Unified entity schema
+
+from torch_geometric.datasets import BioKG
+data = BioKG(root="./data")
+graph = data[0]
+🔹 Hetionet
+Focuses on treatment and disease mechanisms, using 29 integrated public sources.
+Step 2: Mapping Entities and Relations
+The raw files often contain:
+IDs: e.g. DB00316, HGNC:1173
+Labels: e.g. ibuprofen, TP53
+Relationship types: e.g. "treats", "binds", "interacts_with"
+
+We normalize and map them into a common vocabulary:
+drug_vocab = {id: idx for idx, id in enumerate(df_drugs['drugbank_id'])}
+protein_vocab = {id: idx for idx, id in enumerate(df_targets['uniprot_id'])}
+Step 3: Building the Heterogeneous Graph
+A heterogeneous graph has different node types and edge types, e.g.:
+(drug)-[binds_to]->(protein)
+(drug)-[treats]->(disease)
+Using PyTorch Geometric:
+from torch_geometric.data import HeteroData
+
+data = HeteroData()
+data['drug'].x = torch.eye(num_drugs)
+data['protein'].x = torch.eye(num_proteins)
+# Add edges
+edge_index = torch.tensor([
+    [src_ids],  # drug indices
+    [dst_ids],  # protein indices
+], dtype=torch.long)
+data['drug', 'binds_to', 'protein'].edge_index = edge_index
+This structure allows us to preserve semantic relationships without flattening them into a single graph.
+Step 4: Converting to Homogeneous Graph (Optional)
+To use GNN models like GraphSAGE, we sometimes convert to a homogeneous graph, where all nodes are treated similarly:
+from torch_geometric.utils import to_homogeneous
+homo_data = to_homogeneous(data)
+We also inject node features (if missing):
+if not hasattr(homo_data, 'x'):
+    homo_data.x = torch.randn(homo_data.num_nodes, 128)
+Step 5: Generating Negative Samples for Link Prediction
+To predict if two drugs interact, we need:
+Positive samples: known DDIs
+Negative samples: drug pairs that aren't known to interact
+
+def generate_negative_samples(edge_index, num_nodes, num_samples):
+    neg_edges = []
+    for _ in range(num_samples):
+        i, j = np.random.randint(0, num_nodes, 2)
+        if [i, j] not in edge_index.T.tolist():
+            neg_edges.append([i, j])
+    return torch.tensor(neg_edges).T
+Step 6: Validation and Stats
+Before training, check the graph stats:
+print(data)
+# HeteroData with node types: 'drug', 'protein', 'disease'
+# Edge types: ('drug', 'binds_to', 'protein'), ...
+Ensure class balance between positive and negative samples
+Check for isolated nodes (no edges)
+
+Conclusion
+Constructing a biomedical knowledge graph isn't just about parsing files, it's about capturing the structure of biology in a machine-readable format. This structure becomes the foundation for prediction, discovery, and AI-enhanced decision making.
+In the next article, we'll show how to train GraphSAGE and R-GCN models on this graph to predict drug-drug interactions and uncover new therapeutic insights.
+Article #3: Modeling Drug Interactions with GraphSAGE and R-GCN

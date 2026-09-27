@@ -40,9 +40,7 @@ class Settings(BaseSettings):
         "CRITICAL",
     ] = "INFO"
 
-    database_url: str = (
-        "postgresql+asyncpg://genai:genai@localhost:5432/genai"
-    )
+    database_url: str
 
     openai_api_key: SecretStr | None = None
     anthropic_api_key: SecretStr | None = None
@@ -50,4 +48,4 @@ class Settings(BaseSettings):
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
-    return Settings()
+    return Settings()  # type: ignore[call-arg]
