@@ -8,6 +8,14 @@ from app.generation.models import (
 )
 
 
+class GenerationProviderError(RuntimeError):
+    """Operational provider failure, distinct from model abstention."""
+
+
+class GenerationOutputError(RuntimeError):
+    """Provider responded, but the output violated the structured contract."""
+
+
 class GenerationProvider(Protocol):
     provider: str
     model: str
