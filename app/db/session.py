@@ -2,6 +2,7 @@ from collections.abc import AsyncGenerator
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import (
+    AsyncEngine,
     AsyncSession,
     async_sessionmaker,
     create_async_engine,
@@ -9,28 +10,38 @@ from sqlalchemy.ext.asyncio import (
 
 from app.core.config import get_settings
 
-settings = get_settings()
+_engine: AsyncEngine | None = None
 
-engine = create_async_engine(
-    settings.database_url,
-    pool_pre_ping=True,
-)
 
-SessionFactory = async_sessionmaker(
-    bind=engine,
-    class_=AsyncSession,
-    expire_on_commit=False,
-)
+def get_engine() -> AsyncEngine:
+    """Create the database engine only when persistence is used."""
+    global _engine
+
+    if _engine is None:
+        database_url = get_settings().database_url
+        if database_url is None:
+            raise RuntimeError("DATABASE_URL is not configured")
+        _engine = create_async_engine(database_url, pool_pre_ping=True)
+
+    return _engine
+
+
+def get_session_factory() -> async_sessionmaker[AsyncSession]:
+    return async_sessionmaker(
+        bind=get_engine(),
+        class_=AsyncSession,
+        expire_on_commit=False,
+    )
 
 
 async def get_session() -> AsyncGenerator[AsyncSession, None]:
-    async with SessionFactory() as session:
+    async with get_session_factory()() as session:
         yield session
 
 
 async def check_database() -> bool:
     try:
-        async with engine.connect() as connection:
+        async with get_engine().connect() as connection:
             await connection.execute(text("SELECT 1"))
         return True
     except Exception:
@@ -38,4 +49,8 @@ async def check_database() -> bool:
 
 
 async def dispose_engine() -> None:
-    await engine.dispose()
+    global _engine
+
+    if _engine is not None:
+        await _engine.dispose()
+        _engine = None
