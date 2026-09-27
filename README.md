@@ -48,7 +48,7 @@ The governing principle is simple: **implement deterministic primitives first, m
 | Governance | Deterministic `allow`, `abstain`, and `human_review` outcomes; candidate/final separation |
 | Human review | Pending/approved/rejected lifecycle, reviewer rationale, evidence snapshot, concurrency-safe decision update |
 | API | Governed answers, safe processing-run catalog, review queue/retrieval, and concurrency-safe decisions |
-| Interface | Responsive React/TypeScript answer workbench and human-review console served by FastAPI |
+| Interface | Responsive React/TypeScript document upload, answer workbench, and human-review console served by FastAPI |
 | Observability | Central logging/Logfire configuration and workflow boundary metadata without raw prompt logging |
 
 ## Measured retrieval results
@@ -101,6 +101,8 @@ uv run uvicorn app.main:app --reload
 Set provider keys in the local `.env` only. `.env` and common secret/key formats are excluded from version control. Never commit real credentials; `.env.example` contains placeholders only.
 
 Open [http://localhost:8000](http://localhost:8000) for the answer workbench and review console. For frontend hot reload, run `npm --prefix ui run dev` in a second terminal; Vite proxies same-origin API requests to FastAPI on port 8000.
+
+Upload UTF-8 `.txt` or `.md` files (up to 2 MB) in the workbench to index a new processing run. Set `OPENAI_API_KEY` locally before indexing. PDF and Word files are not supported yet. If the review queue returns `503`, check `/ready`, the local PostgreSQL container, `DATABASE_URL`, and `uv run alembic upgrade head`.
 
 Health endpoints:
 

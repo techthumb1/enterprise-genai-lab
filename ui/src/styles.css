@@ -177,6 +177,45 @@ svg {
   box-shadow: 0 3px 12px rgb(0 0 0 / 12%);
 }
 
+.upload-form {
+  margin-bottom: 24px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-soft);
+}
+
+.upload-form p {
+  margin: 5px 0 12px;
+  color: var(--ink-soft);
+  font-size: 12px;
+}
+
+.upload-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.upload-controls input {
+  max-width: 100%;
+  font-size: 12px;
+}
+
+.upload-controls button {
+  padding: 10px 13px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--accent);
+  color: white;
+  font-weight: 700;
+}
+
+.upload-form .inline-alert {
+  margin-top: 12px;
+}
+
 .service-status {
   display: flex;
   justify-self: end;

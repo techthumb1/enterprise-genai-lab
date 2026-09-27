@@ -1,5 +1,6 @@
 import type {
   AnswerResponse,
+  DocumentUploadResponse,
   HealthResponse,
   ProcessingRun,
   ReviewDecision,
@@ -44,6 +45,13 @@ export const api = {
 
   processingRuns: (): Promise<ProcessingRun[]> =>
     request("/api/processing-runs?ready_only=true&limit=100"),
+
+  uploadDocument: (file: File): Promise<DocumentUploadResponse> =>
+    request(`/api/documents?filename=${encodeURIComponent(file.name)}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/octet-stream" },
+      body: file,
+    }),
 
   answer: (input: {
     query: string;

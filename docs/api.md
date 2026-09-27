@@ -32,6 +32,7 @@ Returns processing runs that the answer workbench can select. Each item contains
 ## Human review
 
 - `GET /api/reviews?status=pending&limit=50`: list review records by status.
+- `POST /api/documents?filename=policy.md`: upload raw UTF-8 `.txt`, `.md`, or `.markdown` bytes (2 MB maximum) and synchronously index the processing run. Use `Content-Type: application/octet-stream`; response contains the document ID, processing run ID, chunk count, and readiness. Requires configured database, migrated schema, and `OPENAI_API_KEY`.
 - `GET /api/reviews/{review_id}`: retrieve a review record.
 - `POST /api/reviews/{review_id}/decision`: approve or reject a pending review.
 

@@ -3,7 +3,9 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 import logfire
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
+from sqlalchemy.exc import SQLAlchemyError
 
 from app.api.router import api_router
 from app.core.config import get_settings
@@ -31,6 +33,16 @@ def create_app(*, frontend_directory: Path | None = None) -> FastAPI:
     )
 
     application.include_router(api_router)
+    @application.exception_handler(SQLAlchemyError)
+    async def database_unavailable(_request: Request, _exc: SQLAlchemyError) -> JSONResponse:
+        return JSONResponse(
+            status_code=503,
+            content={
+                "detail": "Database unavailable or schema is outdated. "
+                "Check /ready and run uv run alembic upgrade head."
+            },
+        )
+
     logfire.instrument_fastapi(application)
     application.frontend(
         "/",
